@@ -1,0 +1,27 @@
+{
+    "video_paths": [
+        "data/videos/clipped/5 Poor People vs 1 Secret Millionaire"
+    ],
+    "interval_seconds": 30,
+    "fps": 5,
+    "segment_limit": -1,
+    "cluster_size": 100,
+    "face_detection_score_threshold": 0.85,
+    "face_quality_score_threshold": 22,
+    "max_faces_per_character": 3,
+    "min_duration_for_audio": 2,
+    "history_length": 0,
+    "max_retries": 5,
+    "query_num": 10,
+    "topk": 5,
+    "max_retrieval_steps": 10,
+    "logging": "INFO",
+    "save_dir": "",
+    "intermediate_save_dir": "",
+    "input_dir": "",
+    "max_parallel_videos": 32,
+    "log_dir": "logs",
+    "temperature": 0,
+    "train": true,
+    "model": "qwen3"
+}

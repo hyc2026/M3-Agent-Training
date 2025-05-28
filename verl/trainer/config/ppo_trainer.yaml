@@ -137,6 +137,9 @@ actor_rollout_ref:
       max_turns: null  # null for no limit (default max_length // 3)
       tool_config_path: null  # null for no tool
       format: chatml  # chatml, more formats will be supported in the future
+    search_threshold: 0.5
+    search_topk: 2
+    encourage_search: True
 
 critic:
   rollout_n: ${actor_rollout_ref.rollout.n}
@@ -206,6 +209,7 @@ reward_model:
   use_dynamic_bsz: ${critic.use_dynamic_bsz}
   forward_max_token_len_per_gpu: ${critic.forward_max_token_len_per_gpu}
   reward_manager: naive
+  verify_model: gpt-4o-2024-11-20
   launch_reward_fn_async: False # custom reward function executed async on CPU, during log_prob
   sandbox_fusion:
     url: null # faas url to run code in cloud sandbox
