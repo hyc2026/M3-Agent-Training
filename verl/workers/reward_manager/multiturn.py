@@ -20,17 +20,56 @@ from verl.utils.reward_score import _default_compute_score
 from mmagent.retrieve import verify_qa
 import json
 
+import openai
+from mmagent.utils.chat_api import generate_messages
+from mmagent.prompts import prompt_agent_verify_answer_referencing
+config = json.load(open("/opt/tiger/open_verl/api_config.json"))
+
+def get_response(model, client, messages, timeout=30):
+    response = client.chat.completions.create(
+        model=model, messages=messages, temperature=0, timeout=timeout, max_tokens=2048
+    )
+    return response.choices[0].message.content, response.usage.total_tokens
+
+def get_response_with_retry(model, client, messages, timeout=30):
+    for i in range(5):
+        try:
+            return get_response(model, client, messages, timeout)
+        except Exception as e:
+            time.sleep(20)
+            print(f"Retry {i} times, exception: {e} from message {messages}")
+            continue
+    raise Exception(f"Failed to get response after 5 retries")
+
 def eval_answer(question, predict, ground_truth, model):
-    if predict == "":
-        return False
     if model is None:
-        response = verify_qa(question, ground_truth, predict)
-    else:
-        response = verify_qa(question, ground_truth, predict, model=model)
-    if response is None:
-        return False
-    response = response.lower()
-    return 1 if "yes" in response else 0
+        model = "gpt-4o-2024-11-20"
+    client = openai.AzureOpenAI(
+        azure_endpoint=config[model]["azure_endpoint"],
+        api_version=config[model]["api_version"],
+        api_key=config[model]["api_key"],
+    )
+    if predict == "":
+        return 0
+    try:
+        input = [
+            {
+                "type": "text",
+                "content": prompt_agent_verify_answer_referencing.format(
+                    question=question,
+                    ground_truth_answer=ground_truth,
+                    agent_answer=predict,
+                ),
+            }   
+        ]
+        messages = generate_messages(input)
+        response = get_response_with_retry(model, client, messages)
+        result = response[0].lower()
+    except Exception as e:
+        print(f"Error verifying qa: {question} | {str(e)}")
+        return 0
+    return 1 if "yes" in result else 0
+
 
 class MultiTurnRewardManager:
     """The reward manager."""
@@ -49,20 +88,18 @@ class MultiTurnRewardManager:
         for i in range(len(data)):
             data_item = data[i]
             valid_response_length = data_item.batch["attention_masks"].sum()
-            if data_item.non_tensor_batch["responses"] != "":
-                reward = eval_answer(data_item.non_tensor_batch["question"], data_item.non_tensor_batch["responses"], data_item.non_tensor_batch["answer"], model)
-                # time.sleep(0.4) # control the qps of the GPT-4o
+            if "seq_final_reward" in data_item.non_tensor_batch:
+                reward = data_item.non_tensor_batch["seq_final_reward"]
             else:
-                reward = 0
-            scores.append(reward)
-            reward += data_item.non_tensor_batch["bonus"]
-            # related_id_scores = json.loads(data_item.non_tensor_batch["related_id_scores"])
-            # similarity_score = 0
-            # if len(related_id_scores) > 0:
-            #     for j in related_id_scores:
-            #         if j > 0.4:
-            #             similarity_score += j
-            #     reward += similarity_score / len(related_id_scores)
+                if data_item.non_tensor_batch["responses"] != "":
+                    if data_item.non_tensor_batch["type"] == "web":
+                        reward = eval_answer(data_item.non_tensor_batch["question"], data_item.non_tensor_batch["responses"], data_item.non_tensor_batch["answer"], model)
+                    else:
+                        reward = 1 if data_item.non_tensor_batch["responses"].strip() == data_item.non_tensor_batch["answer"].strip() else 0
+                else:
+                    reward = 0
+                scores.append(reward)
+                reward += data_item.non_tensor_batch["bonus"]
             reward_tensor[i, valid_response_length - 1] = reward
 
         if return_dict:

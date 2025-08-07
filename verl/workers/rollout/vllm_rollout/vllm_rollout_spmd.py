@@ -224,7 +224,7 @@ class vLLMRollout(BaseRollout):
             }
 
         conversations = []
-        for i in range(prompts.batch.batch_size[0]):
+        for i in range(len(prompts)):
             if not prompts.non_tensor_batch["finish"][i]:
                 conversations.append(json.loads(prompts.non_tensor_batch["conversations"][i]))
         print("conversations:", len(conversations))
@@ -251,7 +251,7 @@ class vLLMRollout(BaseRollout):
         assert len(outputs) == len(conversations)
 
         idx = 0
-        for i in range(prompts.batch.batch_size[0]):
+        for i in range(len(prompts)):
             if not prompts.non_tensor_batch["finish"][i]:
                 conversations[idx].append({"role": "assistant", "content": outputs[idx].outputs[0].text})
                 prompts.non_tensor_batch["conversations"][i] = json.dumps(conversations[idx])

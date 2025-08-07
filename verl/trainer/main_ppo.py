@@ -20,7 +20,7 @@ import os
 import hydra
 import ray
 
-from verl.trainer.ppo.ray_trainer import RayPPOTrainer
+from verl.trainer.ppo.ray_trainer import RayPPOTrainer, RayDAPOTrainer
 from verl.trainer.ppo.reward import load_reward_manager
 
 
@@ -173,7 +173,11 @@ class TaskRunner:
             for line in f.readlines():
                 val_dataset.append(json.loads(line))
         train_sampler = create_rl_sampler(config.data, train_dataset)
-        trainer = RayPPOTrainer(
+        if config.algorithm.use_dynamic_sampling:
+            trainer_cls = RayDAPOTrainer
+        else:
+            trainer_cls = RayPPOTrainer
+        trainer = trainer_cls(
             config=config,
             tokenizer=tokenizer,
             processor=processor,

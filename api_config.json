@@ -1,44 +1,8 @@
 {
     "gpt-4o-2024-11-20": {
-        "azure_endpoint": "https://search-va.byteintl.net/gpt/openapi/online/v2/crawl",
-        "api_version": "2024-03-01-preview",
-        "api_key": "OpenAI key",
+        "azure_endpoint": "",
+        "api_version": "",
+        "api_key": "",
         "qpm": 100
-    },
-    "gemini-1.5-pro-002": {
-        "azure_endpoint": "https://search-va.byteintl.net/gpt/openapi/online/multimodal/crawl",
-        "api_version": "2024-03-01-preview",
-        "api_key": "OpenAI key",
-        "qpm": 100
-    },
-    "text-embedding-3-large": {
-        "azure_endpoint": "https://search-va.byteintl.net/gpt/openapi/online/multimodal/crawl",
-        "api_version": "2024-03-01-preview",
-        "api_key": "OpenAI key",
-        "qpm": 1000
-    },
-    "whisper": {
-        "azure_endpoint": "https://search-va.byteintl.net/gpt/openapi/online/v2/crawl",
-        "api_version": "2024-03-01-preview",
-        "api_key": "OpenAI key",
-        "qpm": 100
-    },
-    "gpt-4o-audio-preview": {
-        "azure_endpoint": "https://search-va.byteintl.net/gpt/openapi/online/v2/crawl",
-        "api_version": "2024-03-01-preview",
-        "api_key": "OpenAI key",
-        "qpm": 100
-    },
-    "gpt-4o-2024-08-06": {
-        "azure_endpoint": "https://search-va.byteintl.net/gpt/openapi/online/v2/crawl",
-        "api_version": "2024-03-01-preview",
-        "api_key": "OpenAI key",
-        "qpm": 300
-    },
-    "gemini-2.0-pro-02-05": {
-        "azure_endpoint": "https://search-va.byteintl.net/gpt/openapi/online/multimodal/crawl",
-        "api_version": "2024-03-01-preview",
-        "api_key": "OpenAI key",
-        "qpm": 10
     }
 }

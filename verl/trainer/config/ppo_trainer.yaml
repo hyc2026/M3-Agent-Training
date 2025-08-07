@@ -46,7 +46,7 @@ actor_rollout_ref:
     clip_ratio_low: 0.2
     clip_ratio_high: 0.2
     clip_ratio_c: 3.0 # lower bound of the value for Dual-clip PPO from https://arxiv.org/pdf/1912.09729
-    loss_agg_mode: "token-mean" # / "seq-mean-token-sum" / "seq-mean-token-mean"
+    loss_agg_mode: "seq-mean-token-mean" # / "seq-mean-token-sum" / "seq-mean-token-mean"
     entropy_coeff: 0
     use_kl_loss: False # True for GRPO
     use_torch_compile: True # False to disable torch compile
@@ -93,9 +93,9 @@ actor_rollout_ref:
     name: vllm
     mode: sync # sync: LLM, async: AsyncLLM
     chat_scheduler: null # async chat scheduler, e.g examples.ppo_trainer.naive_chat_scheduler.NaiveChatCompletionScheduler
-    temperature: 1.0
-    top_k: -1 # 0 for hf rollout, -1 for vllm rollout
-    top_p: 1
+    temperature: 0.6
+    top_k: 20 # 0 for hf rollout, -1 for vllm rollout
+    top_p: 0.95
     use_fire_sampling: False # https://arxiv.org/abs/2410.21236
     prompt_length: ${data.max_prompt_length}  # not use for opensource
     response_length: ${data.max_response_length}
@@ -127,11 +127,11 @@ actor_rollout_ref:
         attention_backend: null # null means use the engine default value, available options: flashinfer, triton, flashmla
     val_kwargs:
       # sampling parameters for validation
-      top_k: -1 # 0 for hf rollout, -1 for vllm rollout
-      top_p: 1.0
-      temperature: 0
+      top_k: 20 # 0 for hf rollout, -1 for vllm rollout
+      top_p: 0.95
+      temperature: 0.6
       n: 1
-      do_sample: False # default eager for validation
+      do_sample: True # default eager for validation
     multi_turn:
       enable: False  # should set rollout.name to sglang_async if True
       max_turns: null  # null for no limit (default max_length // 3)
@@ -230,6 +230,7 @@ algorithm:
     kl_coef: 0.001
     horizon: 10000
     target_kl: 0.1
+  use_dynamic_sampling: False
 
 trainer:
   balance_batch: True
